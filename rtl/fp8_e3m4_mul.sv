@@ -30,7 +30,7 @@ module fp8_e3m4_mul (
         end
     endfunction
 
-    always_comb begin
+    always @* begin
         a_zero = (a[6:0] == 7'b0);
         b_zero = (b[6:0] == 7'b0);
         a_inf  = (a[6:4] == 3'b111) && (a[3:0] == 4'b0);

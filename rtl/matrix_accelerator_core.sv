@@ -22,7 +22,7 @@ module matrix_accelerator_core (
     integer input_column;
     integer status_index;
 
-    always_comb begin
+    always @* begin
         a_edge = 32'b0;
         b_edge = 32'b0;
 
@@ -89,7 +89,7 @@ module matrix_accelerator_core (
         .pe_status(pe_status)
     );
 
-    always_comb begin
+    always @* begin
         status = 4'b0;
         for (status_index = 0; status_index < 16; status_index = status_index + 1)
             status = status | pe_status[status_index*4 +: 4];

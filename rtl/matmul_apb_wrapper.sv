@@ -43,7 +43,7 @@ module matmul_apb_wrapper (
     assign address_is_b = (PADDR >= MATRIX_B_BASE) && (PADDR < MATRIX_C_BASE);
     assign address_is_c = (PADDR >= MATRIX_C_BASE) && (PADDR < 12'h1C0);
 
-    always_comb begin
+    always @* begin
         element_index = PADDR[5:2];
         PRDATA = 32'b0;
 
@@ -65,7 +65,7 @@ module matmul_apb_wrapper (
         endcase
     end
 
-    always_comb begin
+    always @* begin
         PSLVERR = 1'b0;
         if (transfer) begin
             if (!address_is_aligned)
