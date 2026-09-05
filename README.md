@@ -34,17 +34,9 @@ The APB wrapper stores 16 eight-bit elements for each input matrix. A start comm
 
 ## Systolic dataflow
 
-```mermaid
-flowchart TB
-    B0["B column inputs"] --> P00["PE 0,0"]
-    P00 --> P10["PE 1,0"]
-    A0["A row inputs"] --> P00
-    P00 --> P01["PE 0,1"]
-    P01 --> P11["PE 1,1"]
-    P10 --> P11
-```
+![Architecture of the dual-mode 4×4 systolic matrix accelerator](docs/images/systolic-array-architecture.png)
 
-The complete implementation extends this pattern to four rows and four columns. Every PE registers and forwards its A operand to the right and its B operand downward while accumulating the local product.
+**Figure — 4×4 systolic-array datapath.** Matrix-A elements enter at the left edge and move horizontally along the blue paths; matrix-B elements enter at the top edge and move vertically along the orange paths. Each `PE(i,j)` registers and forwards both operands while multiplying the pair that meets locally and accumulating it into output element `C(i,j)`. The same physical mesh executes either signed INT8 or FP8 E3M4 arithmetic, selected once for the complete operation.
 
 For output element `C[i,j]`, the PE computes:
 
@@ -52,7 +44,7 @@ For output element `C[i,j]`, the PE computes:
 C[i,j] = Σ A[i,k] × B[k,j],  k = 0..3
 ```
 
-The controller injects `A[i,k]` at cycle `k+i` and `B[k,j]` at cycle `k+j`. After horizontal and vertical propagation, both operands meet at PE `(i,j)` during cycle `k+i+j`. Zero-valued padding fills unused edge slots. The last useful product reaches PE `(3,3)` at cycle 9.
+There are **no diagonal data connections** in the mesh. The controller instead creates a diagonal *wavefront in time* by staggering the edge inputs: it injects `A[i,k]` at cycle `k+i` and `B[k,j]` at cycle `k+j`. After strictly horizontal and vertical propagation, both operands meet at `PE(i,j)` during cycle `k+i+j`. Zero-valued padding fills unused edge slots. For a 4×4 multiplication, the final useful pair (`k = 3`) reaches the farthest processing element, `PE(3,3)`, at cycle `3+3+3 = 9`; the controller then captures all 16 accumulated results.
 
 ## Processing element
 
