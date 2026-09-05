@@ -1,0 +1,30 @@
+name: RTL simulation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+
+      - name: Verify FP8 arithmetic
+        run: |
+          iverilog -g2012 -s fp8_arithmetic_tb \
+            -o fp8_arithmetic.vvp rtl/*.sv tb/fp8_arithmetic_tb.sv
+          vvp fp8_arithmetic.vvp
+
+      - name: Verify APB accelerator
+        run: |
+          iverilog -g2012 -s matmul_apb_tb \
+            -o matmul_apb.vvp rtl/*.sv tb/matmul_apb_tb.sv
+          vvp matmul_apb.vvp
